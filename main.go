@@ -32,7 +32,7 @@ var (
 )
 
 func main() {
-	dbinfo := fmt.Sprintf("user=%s host=%s password=%s dbname=%s sslmode=disable", DB_USERNAME, os.Getenv("PGPORT"), os.Getenv("PGPASSWORD"), DB_NAME)
+	dbinfo := fmt.Sprintf("user=%s port=%s password=%s dbname=%s sslmode=disable", DB_USERNAME, os.Getenv("PGPORT"), os.Getenv("PGPASSWORD"), DB_NAME)
 	db, err = sql.Open("postgres", dbinfo)
 	checkError(err)
 	defer db.Close()
