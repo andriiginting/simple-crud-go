@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -12,13 +11,12 @@ import (
 	"testing"
 
 	"github.com/andriiginting/simple-crud-go/domain"
+	"github.com/andriiginting/simple-crud-go/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
-	viperConfig := GetConfig()
-	username, port, _, dbname := GetParsedConfig(viperConfig)
-	dbinfo := fmt.Sprintf("user=%s port=%d dbname=%s sslmode=disable", username, port, dbname)
+	dbinfo := config.ConnectionString()
 	db, err = sql.Open("postgres", dbinfo)
 	checkError(err)
 	defer db.Close()

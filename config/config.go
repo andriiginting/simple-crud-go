@@ -28,8 +28,13 @@ func ConnectionString() string{
 func GetConfig() (string, int, string, string) {
 	deployEnv := os.Getenv("DEPLOYENV")
 	config := viper.New()
-	config.SetConfigFile("application.yml")
+	config.SetConfigName("application")
+	config.AddConfigPath("./")
+	config.AddConfigPath("../")
+	config.AddConfigPath("../../")
+	config.SetConfigType("yaml")
 	config.ReadInConfig()
-
-	return viper.GetString(deployEnv + "." + POSTGRE_USERNAME_KEY), viper.GetInt(deployEnv + "." + POSTGRE_PORT_KEY), viper.GetString(deployEnv + "." + POSTGRE_PASSWORD_KEY), viper.GetString(deployEnv + "." + POSTGRE_DB_NAME_KEY)
+	
+	return config.GetString(deployEnv + "." + POSTGRE_USERNAME_KEY), config.GetInt(deployEnv + "." + POSTGRE_PORT_KEY), config.GetString(deployEnv + "." + POSTGRE_PASSWORD_KEY), config.GetString(deployEnv + "." + POSTGRE_DB_NAME_KEY)
 }
+
