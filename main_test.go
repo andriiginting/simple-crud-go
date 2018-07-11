@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -11,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/andriiginting/simple-crud-go/domain"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -38,7 +40,7 @@ func TestReadFood(t *testing.T) {
 }
 
 func TestInsertFood(t *testing.T) {
-	food := Food{4, "Spagetthi", 12000, "La Fonte"}
+	food := domain.Food{4, "Spagetthi", 12000, "La Fonte"}
 	lastInsertId := insertFood(food)
 	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
 
@@ -47,7 +49,7 @@ func TestInsertFood(t *testing.T) {
 }
 
 func TestDeleteFood(t *testing.T) {
-	foodInserted := Food{0, "Kopi Aku Kamu", 18000, "Aku Kamu"}
+	foodInserted := domain.Food{0, "Kopi Aku Kamu", 18000, "Aku Kamu"}
 	lastInsertId := insertFood(foodInserted)
 	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
 
@@ -99,7 +101,7 @@ func TestInsertNewFood(t *testing.T) {
 }
 
 func TestDeleteExistingFood(t *testing.T) {
-	food := Food{4, "Spagetthi", 12000, "La Fonte"}
+	food := domain.Food{4, "Spagetthi", 12000, "La Fonte"}
 	lastInsertId := insertFood(food)
 	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
 
@@ -114,7 +116,7 @@ func TestDeleteExistingFood(t *testing.T) {
 }
 
 func TestUpdateExistingFoodPrice(t *testing.T) {
-	food := Food{4, "Spagetthi", 12000, "La Fonte"}
+	food := domain.Food{4, "Spagetthi", 12000, "La Fonte"}
 	lastInsertId := insertFood(food)
 	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
 

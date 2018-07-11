@@ -4,22 +4,17 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"github.com/spf13/viper"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-)
 
-type Food struct {
-	Id    int    `json:"id,omitempty"`
-	Name  string `json:"name,omitempty"`
-	Price int    `json:"price,omitempty"`
-	Owner string `json:"owner,omitempty"`
-}
+	"github.com/andriiginting/simple-crud-go/domain"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"github.com/spf13/viper"
+)
 
 const (
 	POSTGRE_USERNAME_KEY = "PGUSERNAME"
@@ -68,7 +63,7 @@ func CreateRouter() *mux.Router {
 	return router
 }
 
-func readFood(id int) *Food {
+func readFood(id int) *domain.Food {
 	row := db.QueryRow("SELECT * FROM food WHERE ID=$1", id)
 
 	var foodId int
@@ -81,11 +76,11 @@ func readFood(id int) *Food {
 		return nil
 	} else {
 		checkError(err)
-		return &Food{foodId, name, price, owner}
+		return &domain.Food{foodId, name, price, owner}
 	}
 }
 
-func insertFood(food Food) int {
+func insertFood(food domain.Food) int {
 	var lastInsertId int
 	err = db.QueryRow("INSERT INTO food(name,price,owner) VALUES($1,$2,$3) returning id;", food.Name, food.Price, food.Owner).Scan(&lastInsertId)
 	checkError(err)
@@ -131,7 +126,7 @@ func InsertNewFood(w http.ResponseWriter, r *http.Request) {
 	foodPrice, err := strconv.Atoi(r.FormValue("price"))
 	checkError(err)
 	foodOwner := r.FormValue("owner")
-	food := Food{0, foodName, foodPrice, foodOwner}
+	food := domain.Food{0, foodName, foodPrice, foodOwner}
 	insertedFoodId := insertFood(food)
 	insertedFood := readFood(insertedFoodId)
 	json.NewEncoder(w).Encode(insertedFood)
@@ -177,7 +172,7 @@ func UpdateExistingFoodPrice(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllFood(w http.ResponseWriter, r *http.Request) {
-	var foods []Food
+	var foods []domain.Food
 
 	rows, err := db.Query("SELECT * FROM food order by id")
 	checkError(err)
@@ -189,7 +184,7 @@ func GetAllFood(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&id, &name, &price, &owner)
 		checkError(err)
 
-		foods = append(foods, Food{id, name, price, owner})
+		foods = append(foods, domain.Food{id, name, price, owner})
 	}
 	json.NewEncoder(w).Encode(foods)
 }
