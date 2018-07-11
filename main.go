@@ -23,9 +23,9 @@ type Food struct {
 
 const (
 	POSTGRE_USERNAME_KEY = "PGUSERNAME"
-	POSTGRE_PORT_KEY = "PGPORT"
+	POSTGRE_PORT_KEY     = "PGPORT"
 	POSTGRE_PASSWORD_KEY = "PGPASSWORD"
-	POSTGRE_DB_NAME_KEY = "DBNAME"
+	POSTGRE_DB_NAME_KEY  = "DBNAME"
 )
 
 var (
@@ -55,7 +55,7 @@ func GetConfig() *viper.Viper {
 
 func GetParsedConfig(viper *viper.Viper) (string, int, string, string) {
 	deployEnv := os.Getenv("DEPLOYENV")
-	return viper.GetString(deployEnv+"."+POSTGRE_USERNAME_KEY), viper.GetInt(deployEnv+"."+POSTGRE_PORT_KEY), viper.GetString(deployEnv+"."+POSTGRE_PASSWORD_KEY), viper.GetString(deployEnv+"."+POSTGRE_DB_NAME_KEY)
+	return viper.GetString(deployEnv + "." + POSTGRE_USERNAME_KEY), viper.GetInt(deployEnv + "." + POSTGRE_PORT_KEY), viper.GetString(deployEnv + "." + POSTGRE_PASSWORD_KEY), viper.GetString(deployEnv + "." + POSTGRE_DB_NAME_KEY)
 }
 
 func CreateRouter() *mux.Router {
