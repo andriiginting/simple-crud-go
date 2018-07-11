@@ -1,6 +1,7 @@
 
 # simple-crud-go
-  [![Build Status](https://travis-ci.org/tools/simple-crud-go.svg)](https://travis-ci.org/andriiginting/simple-crud-go.svg?branch=master)
+[![Build Status](https://travis-ci.org/andriiginting/simple-crud-go.svg?branch=master)](https://travis-ci.org/andriiginting/simple-crud-go)
+
 ## Project Description
 Simple CRUD application for food menu management.
 
