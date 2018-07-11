@@ -1,0 +1,10 @@
+dev:
+  PGUSERNAME: "postgres"
+  PGPASSWORD: "postgres"
+  PGPORT: 5432
+  DBNAME: "food_test"
+ci:
+  PGUSERNAME: "postgres"
+  PGPASSWORD: ""
+  PGPORT: 5433
+  DBNAME: "food_test"

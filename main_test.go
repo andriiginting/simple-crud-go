@@ -14,7 +14,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USERNAME, DB_PASSWORD, DB_NAME)
+	viperConfig := GetConfig()
+	username, port, _, dbname := GetParsedConfig(viperConfig)
+	dbinfo := fmt.Sprintf("user=%s port=%d dbname=%s sslmode=disable", username, port, dbname)
 	db, err = sql.Open("postgres", dbinfo)
 	checkError(err)
 	defer db.Close()
