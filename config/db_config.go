@@ -25,11 +25,11 @@ func ConnectionString() string{
 	return fmt.Sprintf("user=%s port=%d dbname=%s sslmode=disable", username, port, dbName)
 }
 
-func GetConfig() *viper.Viper (string, int, string, string) {
+func GetConfig() (string, int, string, string) {
 	deployEnv := os.Getenv("DEPLOYENV")
 	config := viper.New()
 	config.SetConfigFile("application.yml")
 	config.ReadInConfig()
-	
+
 	return viper.GetString(deployEnv + "." + POSTGRE_USERNAME_KEY), viper.GetInt(deployEnv + "." + POSTGRE_PORT_KEY), viper.GetString(deployEnv + "." + POSTGRE_PASSWORD_KEY), viper.GetString(deployEnv + "." + POSTGRE_DB_NAME_KEY)
 }
