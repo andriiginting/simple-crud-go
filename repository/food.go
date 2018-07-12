@@ -66,12 +66,26 @@ func (self FoodRepository) UpdateFoodPrice(id int, price int) int {
 	return int(affectedRows)
 }
 
-func InitializeFoodRepository(db *sql.DB) FoodRepository{
-	return FoodRepository{db}
+func (self FoodRepository) GetAllFoods() []domain.Food {
+	var foods []domain.Food
+
+	rows, err := self.db.Query("SELECT * FROM food order by id")
+	checkError(err)
+	for rows.Next() {
+		var id int
+		var name string
+		var price int
+		var owner string
+		err = rows.Scan(&id, &name, &price, &owner)
+		checkError(err)
+
+		foods = append(foods, domain.Food{id, name, price, owner})
+	}
+	return foods
 }
 
-func (self FoodRepository) GetDB() *sql.DB {
-	return self.db
+func InitializeFoodRepository(db *sql.DB) FoodRepository{
+	return FoodRepository{db}
 }
 
 func checkError(err error) {

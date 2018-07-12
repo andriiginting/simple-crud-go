@@ -35,7 +35,7 @@ func main() {
 func CreateRouter() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/food/{id}", GetFood).Methods("GET")
-	router.HandleFunc("/food", GetAllFood).Methods("GET")
+	router.HandleFunc("/food", GetAllFoods).Methods("GET")
 	router.HandleFunc("/food", InsertNewFood).Methods("POST")
 	router.HandleFunc("/food/{id}", DeleteExistingFood).Methods("DELETE")
 	router.HandleFunc("/food/{id}", UpdateExistingFoodPrice).Methods("PUT")
@@ -100,23 +100,8 @@ func UpdateExistingFoodPrice(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetAllFood(w http.ResponseWriter, r *http.Request) {
-	var foods []domain.Food
-
-	db := foodRepo.GetDB()
-
-	rows, err := db.Query("SELECT * FROM food order by id")
-	checkError(err)
-	for rows.Next() {
-		var id int
-		var name string
-		var price int
-		var owner string
-		err = rows.Scan(&id, &name, &price, &owner)
-		checkError(err)
-
-		foods = append(foods, domain.Food{id, name, price, owner})
-	}
+func GetAllFoods(w http.ResponseWriter, r *http.Request) {
+	foods := foodRepo.GetAllFoods()
 	json.NewEncoder(w).Encode(foods)
 }
 
