@@ -8,21 +8,24 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/andriiginting/simple-crud-go/domain"
 	"github.com/andriiginting/simple-crud-go/config"
+	"github.com/andriiginting/simple-crud-go/domain"
+	"github.com/andriiginting/simple-crud-go/repository"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
 var (
-	db  *sql.DB
+	foodRepo repository.FoodRepository
 	err error
 )
 
 func main() {
 	dbinfo := config.ConnectionString()
-	db, err = sql.Open("postgres", dbinfo)
+	db, err := sql.Open("postgres", dbinfo)
 	checkError(err)
+
+	foodRepo = repository.InitializeFoodRepository(db)
 	defer db.Close()
 
 	router := CreateRouter()
@@ -39,61 +42,11 @@ func CreateRouter() *mux.Router {
 	return router
 }
 
-func readFood(id int) *domain.Food {
-	row := db.QueryRow("SELECT * FROM food WHERE ID=$1", id)
-
-	var foodId int
-	var name string
-	var price int
-	var owner string
-
-	err = row.Scan(&foodId, &name, &price, &owner)
-	if err == sql.ErrNoRows {
-		return nil
-	} else {
-		checkError(err)
-		return &domain.Food{foodId, name, price, owner}
-	}
-}
-
-func insertFood(food domain.Food) int {
-	var lastInsertId int
-	err = db.QueryRow("INSERT INTO food(name,price,owner) VALUES($1,$2,$3) returning id;", food.Name, food.Price, food.Owner).Scan(&lastInsertId)
-	checkError(err)
-	return lastInsertId
-}
-
-func deleteFood(foodId int) int {
-	stmt, err := db.Prepare("DELETE FROM food where id=$1")
-	checkError(err)
-
-	result, err := stmt.Exec(foodId)
-	checkError(err)
-
-	affectedRows, err := result.RowsAffected()
-	checkError(err)
-
-	return int(affectedRows)
-}
-
-func updateFoodPrice(id int, price int) int {
-	stmt, err := db.Prepare("UPDATE food set price=$1 where id=$2")
-	checkError(err)
-
-	res, err := stmt.Exec(price, id)
-	checkError(err)
-
-	affectedRows, err := res.RowsAffected()
-	checkError(err)
-
-	return int(affectedRows)
-}
-
 func GetFood(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	foodId, err := strconv.Atoi(params["id"])
 	checkError(err)
-	food := readFood(foodId)
+	food := foodRepo.ReadFood(foodId)
 	json.NewEncoder(w).Encode(food)
 }
 
@@ -103,8 +56,8 @@ func InsertNewFood(w http.ResponseWriter, r *http.Request) {
 	checkError(err)
 	foodOwner := r.FormValue("owner")
 	food := domain.Food{0, foodName, foodPrice, foodOwner}
-	insertedFoodId := insertFood(food)
-	insertedFood := readFood(insertedFoodId)
+	insertedFoodId := foodRepo.InsertFood(food)
+	insertedFood := foodRepo.ReadFood(insertedFoodId)
 	json.NewEncoder(w).Encode(insertedFood)
 }
 
@@ -113,7 +66,7 @@ func DeleteExistingFood(w http.ResponseWriter, r *http.Request) {
 	foodId, err := strconv.Atoi(params["id"])
 	checkError(err)
 
-	deleteResponse := deleteFood(foodId)
+	deleteResponse := foodRepo.DeleteFood(foodId)
 	successResponse := url.Values{}
 	successResponse.Add("status", "200")
 	failedResponse := url.Values{}
@@ -134,7 +87,7 @@ func UpdateExistingFoodPrice(w http.ResponseWriter, r *http.Request) {
 	foodPrice, err := strconv.Atoi(r.FormValue("price"))
 	checkError(err)
 
-	updatedResponse := updateFoodPrice(foodId, foodPrice)
+	updatedResponse := foodRepo.UpdateFoodPrice(foodId, foodPrice)
 	successResponse := url.Values{}
 	successResponse.Add("status", "200")
 	failedResponse := url.Values{}
@@ -149,6 +102,8 @@ func UpdateExistingFoodPrice(w http.ResponseWriter, r *http.Request) {
 
 func GetAllFood(w http.ResponseWriter, r *http.Request) {
 	var foods []domain.Food
+
+	db := foodRepo.GetDB()
 
 	rows, err := db.Query("SELECT * FROM food order by id")
 	checkError(err)

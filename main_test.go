@@ -10,57 +10,23 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/andriiginting/simple-crud-go/domain"
 	"github.com/andriiginting/simple-crud-go/config"
+	"github.com/andriiginting/simple-crud-go/domain"
+	"github.com/andriiginting/simple-crud-go/repository"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
 	dbinfo := config.ConnectionString()
-	db, err = sql.Open("postgres", dbinfo)
+	db, err := sql.Open("postgres", dbinfo)
 	checkError(err)
+
+	foodRepo = repository.InitializeFoodRepository(db)
 	defer db.Close()
 
 	testResult := m.Run()
 
 	os.Exit(testResult)
-}
-
-func TestReadFood(t *testing.T) {
-	food := readFood(1)
-	assert.NotNil(t, food)
-	assert.Equal(t, 1, food.Id, "Food ID 1 should be equal")
-	food = readFood(3)
-	assert.NotNil(t, food)
-	assert.Equal(t, 3, food.Id, "Food ID 3 should be equal")
-	food = readFood(-1)
-	assert.Nil(t, food)
-}
-
-func TestInsertFood(t *testing.T) {
-	food := domain.Food{4, "Spagetthi", 12000, "La Fonte"}
-	lastInsertId := insertFood(food)
-	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
-
-	insertedFood := readFood(lastInsertId)
-	assert.NotNil(t, insertedFood)
-}
-
-func TestDeleteFood(t *testing.T) {
-	foodInserted := domain.Food{0, "Kopi Aku Kamu", 18000, "Aku Kamu"}
-	lastInsertId := insertFood(foodInserted)
-	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
-
-	affectedRows := deleteFood(lastInsertId)
-	assert.Equal(t, 1, affectedRows, "There should be only 1 food affected")
-}
-
-func TestUpdateFoodPrice(t *testing.T) {
-	affectedRows := updateFoodPrice(1, 28000)
-	assert.Equal(t, 1, affectedRows, "There should be only 1 food affected")
-	food := readFood(1)
-	assert.Equal(t, 1, food.Id, "Effects of update should have applied only to food ID 1")
-	assert.Equal(t, 28000, food.Price, "Food price should have been updated")
 }
 
 func TestGetFood(t *testing.T) {
@@ -100,7 +66,7 @@ func TestInsertNewFood(t *testing.T) {
 
 func TestDeleteExistingFood(t *testing.T) {
 	food := domain.Food{4, "Spagetthi", 12000, "La Fonte"}
-	lastInsertId := insertFood(food)
+	lastInsertId := foodRepo.InsertFood(food)
 	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
 
 	req, err := http.NewRequest("DELETE", "/food/"+strconv.Itoa(lastInsertId), nil)
@@ -115,7 +81,7 @@ func TestDeleteExistingFood(t *testing.T) {
 
 func TestUpdateExistingFoodPrice(t *testing.T) {
 	food := domain.Food{4, "Spagetthi", 12000, "La Fonte"}
-	lastInsertId := insertFood(food)
+	lastInsertId := foodRepo.InsertFood(food)
 	assert.NotEqual(t, 0, lastInsertId, "Food should have been inserted")
 
 	foodPrice := url.Values{}
